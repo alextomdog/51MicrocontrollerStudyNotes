@@ -1,0 +1,11 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj",
+".\Objects\delay.obj",
+".\Objects\lcd1602.obj",
+".\Objects\keys.obj",
+".\Objects\timer.obj",
+".\Objects\at24c02.obj",
+".\Objects\ds18b20.obj",
+".\Objects\onewire.obj" 
+TO ".\Objects\c51" 
+PRINT(".\Listings\c51.m51") RAMSIZE(256) 

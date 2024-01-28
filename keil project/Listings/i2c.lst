@@ -1,0 +1,138 @@
+C51 COMPILER V9.54   I2C                                                                   01/26/2024 19:44:30 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE I2C
+OBJECT MODULE PLACED IN .\Objects\i2c.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE i2c.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\i2c.l
+                    -st) OBJECT(.\Objects\i2c.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          
+   3          sbit I2C_SCL=P2^1;
+   4          sbit I2C_SDA=P2^0;
+   5          
+   6          /**
+   7            * @brief  I2C开始
+   8            * @param  无
+   9            * @retval 无
+  10            */
+  11          void I2C_Start(void)
+  12          {
+  13   1          // 默认开始时候，数据和时钟都被拉高处于高电平状态
+  14   1          I2C_SDA=1;
+  15   1          I2C_SCL=1;
+  16   1          
+  17   1          // 数据先拉低，时钟然后再拉低
+  18   1          I2C_SDA=0;
+  19   1          I2C_SCL=0;
+  20   1      }
+  21          
+  22          /**
+  23            * @brief  I2C停止
+  24            * @param  无
+  25            * @retval 无
+  26            */
+  27          void I2C_Stop(void)
+  28          {
+  29   1          // 先将数据线拉低，确保有一个拉高的优先级顺序
+  30   1          I2C_SDA=0;
+  31   1          
+  32   1          // 时钟先拉高，数据再拉高
+  33   1          I2C_SCL=1;
+  34   1          I2C_SDA=1;
+  35   1      }
+  36          
+  37          /**
+  38            * @brief  I2C发送一个字节
+  39            * @param  Byte 要发送的字节
+  40            * @retval 无
+  41            */
+  42          void I2C_SendByte(unsigned char Byte)
+  43          {
+  44   1          unsigned char i;
+  45   1          for(i=0;i<8;i++)
+  46   1          {
+  47   2              // 设置数据线数据
+  48   2              I2C_SDA=Byte&(0x80>>i);
+  49   2              
+  50   2              // 时钟线起始阶段处于低电平
+  51   2              // 所以先拉高电平，再拉低电平，模拟一个高电平时钟信号
+  52   2              I2C_SCL=1;
+  53   2              I2C_SCL=0;
+  54   2          }
+C51 COMPILER V9.54   I2C                                                                   01/26/2024 19:44:30 PAGE 2   
+
+  55   1      }
+  56          
+  57          /**
+  58            * @brief  I2C接收一个字节
+  59            * @param  无
+  60            * @retval 接收到的一个字节数据
+  61            */
+  62          unsigned char I2C_ReceiveByte(void)
+  63          {
+  64   1          unsigned char i,Byte=0x00;
+  65   1          I2C_SDA=1;
+  66   1          for(i=0;i<8;i++)
+  67   1          {
+  68   2              // 接收数据应在时钟信号处于高电平期间进行接收
+  69   2              I2C_SCL=1;
+  70   2              if(I2C_SDA){Byte|=(0x80>>i);}
+  71   2              I2C_SCL=0;
+  72   2          }
+  73   1          return Byte;
+  74   1      }
+  75          
+  76          /**
+  77            * @brief  I2C发送应答
+  78            * @param  AckBit 应答位，0为应答，1为非应答
+  79            * @retval 无
+  80            */
+  81          void I2C_SendAck(unsigned char AckBit)
+  82          {
+  83   1          // 起始条件：时钟信号处于低电平
+  84   1          I2C_SDA=AckBit;
+  85   1          // 保证时钟信号高电平期间，数据线中的数据已经准备到位
+  86   1          I2C_SCL=1;
+  87   1          I2C_SCL=0;
+  88   1      }
+  89          
+  90          /**
+  91            * @brief  I2C接收应答位
+  92            * @param  无
+  93            * @retval 接收到的应答位，0为应答，1为非应答
+  94            */
+  95          unsigned char I2C_ReceiveAck(void)
+  96          {
+  97   1          unsigned char AckBit;
+  98   1          
+  99   1          // 先将数据线拉高，确保ack信号来源于从机
+ 100   1          // 此时数据线拉低智能由从机来实现
+ 101   1          I2C_SDA=1;
+ 102   1          
+ 103   1          // 拉高时钟信号，拉高后将数据保留下来，然后拉低时钟
+ 104   1          I2C_SCL=1;
+ 105   1          AckBit=I2C_SDA;
+ 106   1          I2C_SCL=0;
+ 107   1          // 保存到的信号就是由从机发出的
+ 108   1          
+ 109   1          return AckBit;
+ 110   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    109    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+C51 COMPILER V9.54   I2C                                                                   01/26/2024 19:44:30 PAGE 3   
+
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
